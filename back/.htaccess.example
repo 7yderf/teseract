@@ -1,0 +1,7 @@
+RewriteEngine On
+
+
+# Redirigir todas las demÃ¡s solicitudes a back/index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]

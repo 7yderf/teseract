@@ -1,0 +1,5 @@
+./front
+./back/vendor
+./back/.env
+./back/.htaccess
+./back/error_log

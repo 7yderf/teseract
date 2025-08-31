@@ -1,0 +1,207 @@
+[02-May-2025 23:25:59 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/controllers/AuthController.php:28
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/auth/login.php(11): controllers\AuthController::login(Array)
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('auth/login.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('POST', '/back/api/v1/au...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/controllers/AuthController.php on line 28
+[02-May-2025 23:29:21 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/controllers/AuthController.php:28
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/auth/login.php(11): controllers\AuthController::login(Array)
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('auth/login.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('POST', '/back/api/v1/au...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/controllers/AuthController.php on line 28
+[02-May-2025 23:32:36 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/controllers/AuthController.php:28
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/auth/login.php(11): controllers\AuthController::login(Array)
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('auth/login.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('POST', '/back/api/v1/au...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/controllers/AuthController.php on line 28
+[02-May-2025 23:32:39 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/controllers/AuthController.php:28
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/auth/login.php(11): controllers\AuthController::login(Array)
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('auth/login.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('POST', '/back/api/v1/au...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/controllers/AuthController.php on line 28
+[02-May-2025 23:33:36 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/controllers/AuthController.php:28
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/auth/login.php(11): controllers\AuthController::login(Array)
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('auth/login.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('POST', '/back/api/v1/au...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/controllers/AuthController.php on line 28
+[02-May-2025 23:33:41 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/controllers/AuthController.php:28
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/auth/login.php(11): controllers\AuthController::login(Array)
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('auth/login.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('POST', '/back/api/v1/au...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/controllers/AuthController.php on line 28
+[02-May-2025 23:33:42 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/controllers/AuthController.php:28
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/auth/login.php(11): controllers\AuthController::login(Array)
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('auth/login.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('POST', '/back/api/v1/au...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/controllers/AuthController.php on line 28
+[02-May-2025 23:55:36 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/activities/index.php(7): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('activities/inde...', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ac...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:55:36 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/tasks/index.php(5): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('tasks/index.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ta...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:55:37 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/activities/index.php(7): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('activities/inde...', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ac...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:55:37 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/tasks/index.php(5): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('tasks/index.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ta...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:55:39 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/activities/index.php(7): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('activities/inde...', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ac...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:55:39 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/tasks/index.php(5): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('tasks/index.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ta...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:55:43 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/activities/index.php(7): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('activities/inde...', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ac...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:55:43 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/tasks/index.php(5): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('tasks/index.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ta...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:57:16 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/tasks/index.php(5): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('tasks/index.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ta...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:57:16 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/activities/index.php(7): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('activities/inde...', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ac...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:57:17 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/tasks/index.php(5): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('tasks/index.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ta...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:57:17 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/activities/index.php(7): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('activities/inde...', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ac...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:57:19 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/tasks/index.php(5): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('tasks/index.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ta...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:57:19 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/activities/index.php(7): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('activities/inde...', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ac...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:57:23 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/tasks/index.php(5): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('tasks/index.php', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ta...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34
+[02-May-2025 23:57:23 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "config\Database" not found in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php:34
+Stack trace:
+#0 /home4/eurekcom/public_html/back/api/v1/activities/index.php(7): helpers\AuthMiddleware::authenticate()
+#1 /home4/eurekcom/public_html/back/helpers/Router.php(57): require_once('/home4/eurekcom...')
+#2 /home4/eurekcom/public_html/back/helpers/Router.php(34): helpers\Router->requireHandler('activities/inde...', Array)
+#3 /home4/eurekcom/public_html/back/api/v1/index.php(43): helpers\Router->resolve('GET', '/back/api/v1/ac...')
+#4 /home4/eurekcom/public_html/back/index.php(24): require_once('/home4/eurekcom...')
+#5 {main}
+  thrown in /home4/eurekcom/public_html/back/helpers/AuthMiddleware.php on line 34

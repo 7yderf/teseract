@@ -1,0 +1,43 @@
+services:
+  web:
+    build:
+      context: ./back # Contexto de la imagen
+      dockerfile: Dockerfile
+    container_name: teseract_apache
+    restart: unless-stopped
+    ports:
+      - "8091:80" # Expone el puerto 80 de Apache en el puerto 8091 de la máquina host
+    volumes:
+      - ./back:/var/www/html # Sincroniza los archivos locales con el contenedor
+      - ./back:/php-local.ini:/usr/local/etc/php/conf.d/php-local.ini
+    expose:
+      - '8091'
+    networks:
+      - app-teseract
+    depends_on:
+      - db # Garantiza que el contenedor de la base de datos se levante antes que el web
+
+  db:
+    image: mysql:8.0 # Usamos la imagen oficial de MySQL 8
+    container_name: teseract_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: my_db_teseract
+      MYSQL_USER: teseract
+      MYSQL_PASSWORD: teseract0
+    volumes:
+      - app-teseract:/var/lib/mysql # Persistencia de datos
+    ports:
+      - "3344:3306" # Expone el puerto 3306 de MySQL
+    expose:
+      - "3306" # Expone el puerto 3306 de MySQL
+    networks:
+      - app-teseract
+
+networks:
+  app-teseract:
+    driver: bridge
+
+volumes:
+  app-teseract:
