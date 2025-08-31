@@ -1,5 +1,7 @@
-./front
-./back/vendor
-./back/.env
-./back/.htaccess
-./back/error_log
+front/
+back/vendor
+back/.env
+back/.htaccess
+back/error_log
+base_teseract_done.sql
+Prueba Técnica_ Desarrollador Fullstack (Nivel Medio).cleaned.pdf
