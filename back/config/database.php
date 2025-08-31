@@ -6,9 +6,9 @@ use PDOException;
 
 class Database {
     private $host = 'db';   // Cambia esto por tu host si es necesario
-    private $db_name = 'my_db_angels';
-    private $username = 'angels';
-    private $password = 'angels';
+    private $db_name = 'my_db_teseract';
+    private $username = 'teseract';
+    private $password = 'teseract0';
     private $conn;
 
     public function connect() {
