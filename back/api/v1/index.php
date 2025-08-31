@@ -24,6 +24,12 @@ $router->register('POST', '/api/v1/admin/disable-user', 'admin/disableUser.php')
 // Resolver rutas protegidas
 $router->register('GET', '/api/v1/profile/show', 'profile/showProfile.php');
 
+// Registrar rutas para documentos
+$router->register('POST', '/api/v1/documents/upload', 'documents/upload.php');
+$router->register('GET', '/api/v1/documents/list', 'documents/list.php');
+$router->register('GET', '/api/v1/documents/download/{id}', 'documents/download.php');
+$router->register('POST', '/api/v1/documents/share', 'documents/share.php');
+
 // Resolver la solicitud actual
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
