@@ -26,7 +26,8 @@ $router->register('GET', '/api/v1/profile/show', 'profile/showProfile.php');
 
 // Registrar rutas para documentos
 $router->register('POST', '/api/v1/documents/upload', 'documents/upload.php');
-$router->register('GET', '/api/v1/documents/list', 'documents/list.php');
+$router->register('GET', '/api/v1/documents/own', 'documents/list-own.php');
+$router->register('GET', '/api/v1/documents/shared', 'documents/list-shared.php');
 $router->register('GET', '/api/v1/documents/download/{id}', 'documents/download.php');
 $router->register('POST', '/api/v1/documents/share', 'documents/share.php');
 

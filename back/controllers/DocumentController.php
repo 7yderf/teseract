@@ -90,59 +90,190 @@ class DocumentController
      * 
      * @return void
      */
-    public static function list()
+    /**
+     * Lista los documentos propios del usuario con paginación y filtros
+     */
+    public static function listOwn($input)
     {
         try {
             // Autenticar usuario
             $userData = AuthMiddleware::authenticate();
             $userId = $userData->userId;
             
+            // Parámetros de paginación y filtrado
+            $page = max(1, $input['page'] ?? 1);
+            $perPage = min(50, $input['per_page'] ?? 10);
+            $order = in_array(strtolower($input['order'] ?? 'desc'), ['asc', 'desc']) ? strtoupper($input['order']) : 'DESC';
+            $search = $input['search'] ?? null;
+            
             // Conectar a la base de datos
             $db = new Database();
             $conn = $db->connect();
             
-            // Consultar documentos propios
-            $query = "SELECT d.id, d.name, d.mime_type, d.created_at 
-                     FROM documents d 
-                     WHERE d.user_id = :user_id 
-                     ORDER BY d.created_at DESC";
+            // Construir consulta base
+            $baseQuery = "SELECT d.id, d.name, d.mime_type, d.created_at 
+                         FROM documents d 
+                         WHERE d.user_id = :user_id";
             
+            $params = ['user_id' => $userId];
+            
+            // Aplicar filtros de búsqueda
+            if ($search) {
+                $baseQuery .= " AND d.name LIKE :search";
+                $params['search'] = "%$search%";
+            }
+            
+            // Ordenamiento
+            $baseQuery .= " ORDER BY d.created_at $order";
+            
+            // Consulta para el total de registros
+            $totalQuery = "SELECT COUNT(*) as total FROM ($baseQuery) as total_query";
+            $stmtTotal = $conn->prepare($totalQuery);
+            foreach ($params as $key => $value) {
+                $stmtTotal->bindValue(":$key", $value);
+            }
+            $stmtTotal->execute();
+            $total = $stmtTotal->fetchColumn();
+            
+            // Cálculos de paginación
+            $lastPage = max(ceil($total / $perPage), 1);
+            $currentPage = min($page, $lastPage);
+            $offset = ($currentPage - 1) * $perPage;
+            
+            // Consulta paginada
+            $query = $baseQuery . " LIMIT :offset, :limit";
             $stmt = $conn->prepare($query);
-            $stmt->bindParam(':user_id', $userId);
+            
+            // Bind parameters
+            foreach ($params as $key => $value) {
+                $stmt->bindValue(":$key", $value);
+            }
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
             $stmt->execute();
             
-            $ownDocuments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $documents = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             
-            // Consultar documentos compartidos con el usuario
-            $queryShared = "SELECT d.id, d.name, d.mime_type, d.created_at, u.email as shared_by 
-                           FROM documents d 
-                           JOIN document_shares ds ON d.id = ds.document_id 
-                           JOIN users u ON ds.shared_by_user_id = u.id
-                           WHERE ds.shared_with_user_id = :user_id 
-                           ORDER BY ds.created_at DESC";
+            // Calcular from y to
+            $from = $total > 0 ? $offset + 1 : 0;
+            $to = min($offset + $perPage, $total);
+            if (count($documents) < $perPage) {
+                $to = $offset + count($documents);
+            }
             
-            $stmtShared = $conn->prepare($queryShared);
-            $stmtShared->bindParam(':user_id', $userId);
-            $stmtShared->execute();
-            
-            $sharedDocuments = $stmtShared->fetchAll(PDO::FETCH_ASSOC);
-            
-            // Preparar respuesta
-            $documents = [
-                'own' => $ownDocuments,
-                'shared' => $sharedDocuments
-            ];
-            
-            ApiResponse::success(
-                $documents,
-                'Documentos recuperados correctamente',
-                200,
-                'documents'
-            );
+            ApiResponse::success([
+                'data' => $documents,
+                'pagination' => [
+                    'total' => $total,
+                    'per_page' => $perPage,
+                    'current_page' => $currentPage,
+                    'last_page' => $lastPage,
+                    'from' => $from,
+                    'to' => $to,
+                    'prev_page' => $currentPage > 1 ? $currentPage - 1 : null,
+                    'next_page' => $currentPage < $lastPage ? $currentPage + 1 : null
+                ]
+            ], 'Documentos recuperados correctamente', 200, 'documents');
             
         } catch (Exception $e) {
             ApiResponse::error(
-                'Error de autenticación',
+                'Error al recuperar documentos',
+                $e->getMessage(),
+                401
+            );
+        }
+    }
+
+    /**
+     * Lista los documentos compartidos con el usuario con paginación y filtros
+     */
+    public static function listShared($input)
+    {
+        try {
+            // Autenticar usuario
+            $userData = AuthMiddleware::authenticate();
+            $userId = $userData->userId;
+            
+            // Parámetros de paginación y filtrado
+            $page = max(1, $input['page'] ?? 1);
+            $perPage = min(50, $input['per_page'] ?? 10);
+            $order = in_array(strtolower($input['order'] ?? 'desc'), ['asc', 'desc']) ? strtoupper($input['order']) : 'DESC';
+            $search = $input['search'] ?? null;
+            
+            // Conectar a la base de datos
+            $db = new Database();
+            $conn = $db->connect();
+            
+            // Construir consulta base
+            $baseQuery = "SELECT d.id, d.name, d.mime_type, d.created_at, u.email as shared_by, ds.created_at as shared_at
+                         FROM documents d 
+                         JOIN document_shares ds ON d.id = ds.document_id 
+                         JOIN users u ON ds.shared_by_user_id = u.id
+                         WHERE ds.shared_with_user_id = :user_id";
+            
+            $params = ['user_id' => $userId];
+            
+            // Aplicar filtros de búsqueda
+            if ($search) {
+                $baseQuery .= " AND (d.name LIKE :search OR u.email LIKE :search)";
+                $params['search'] = "%$search%";
+            }
+            
+            // Ordenamiento
+            $baseQuery .= " ORDER BY ds.created_at $order";
+            
+            // Consulta para el total de registros
+            $totalQuery = "SELECT COUNT(*) as total FROM ($baseQuery) as total_query";
+            $stmtTotal = $conn->prepare($totalQuery);
+            foreach ($params as $key => $value) {
+                $stmtTotal->bindValue(":$key", $value);
+            }
+            $stmtTotal->execute();
+            $total = $stmtTotal->fetchColumn();
+            
+            // Cálculos de paginación
+            $lastPage = max(ceil($total / $perPage), 1);
+            $currentPage = min($page, $lastPage);
+            $offset = ($currentPage - 1) * $perPage;
+            
+            // Consulta paginada
+            $query = $baseQuery . " LIMIT :offset, :limit";
+            $stmt = $conn->prepare($query);
+            
+            // Bind parameters
+            foreach ($params as $key => $value) {
+                $stmt->bindValue(":$key", $value);
+            }
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $documents = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Calcular from y to
+            $from = $total > 0 ? $offset + 1 : 0;
+            $to = min($offset + $perPage, $total);
+            if (count($documents) < $perPage) {
+                $to = $offset + count($documents);
+            }
+            
+            ApiResponse::success([
+                'data' => $documents,
+                'pagination' => [
+                    'total' => $total,
+                    'per_page' => $perPage,
+                    'current_page' => $currentPage,
+                    'last_page' => $lastPage,
+                    'from' => $from,
+                    'to' => $to,
+                    'prev_page' => $currentPage > 1 ? $currentPage - 1 : null,
+                    'next_page' => $currentPage < $lastPage ? $currentPage + 1 : null
+                ]
+            ], 'Documentos compartidos recuperados correctamente', 200, 'shared_documents');
+            
+        } catch (Exception $e) {
+            ApiResponse::error(
+                'Error al recuperar documentos compartidos',
                 $e->getMessage(),
                 401
             );
