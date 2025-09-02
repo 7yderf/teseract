@@ -6,6 +6,7 @@ use helpers\ApiResponse;
 use helpers\AuthMiddleware;
 use config\database;
 use PDO;
+use PDOException;
 use Exception;
 
 class DocumentController
@@ -27,7 +28,8 @@ class DocumentController
             if (!isset($input['data']['attributes']['name'], 
                       $input['data']['attributes']['mime_type'],
                       $input['data']['attributes']['encrypted_content'],
-                      $input['data']['attributes']['encryption_iv'])) {
+                      $input['data']['attributes']['encryption_iv'],
+                      $input['data']['attributes']['encrypted_key'])) {
                 ApiResponse::error(
                     'Datos incompletos',
                     'Faltan campos requeridos para el documento',
@@ -39,28 +41,46 @@ class DocumentController
             $name = $input['data']['attributes']['name'];
             $mimeType = $input['data']['attributes']['mime_type'];
             $encryptedContent = base64_decode($input['data']['attributes']['encrypted_content']);
-            $encryptionIv = $input['data']['attributes']['encryption_iv'];
+            $encryptionIv = base64_decode($input['data']['attributes']['encryption_iv']);
+            $encryptedKey = $input['data']['attributes']['encrypted_key'];
             
             // Conectar a la base de datos
             $db = new Database();
             $conn = $db->connect();
             
-            // Insertar documento
-            $query = "INSERT INTO documents (user_id, name, mime_type, encrypted_content, encryption_iv) 
-                     VALUES (:user_id, :name, :mime_type, :encrypted_content, :encryption_iv)";
+            // Iniciar transacción
+            $conn->beginTransaction();
             
-            $stmt = $conn->prepare($query);
-            $stmt->bindParam(':user_id', $userId);
-            $stmt->bindParam(':name', $name);
-            $stmt->bindParam(':mime_type', $mimeType);
-            $stmt->bindParam(':encrypted_content', $encryptedContent, PDO::PARAM_LOB);
-            $stmt->bindParam(':encryption_iv', $encryptionIv);
-            
-            if ($stmt->execute()) {
+            try {
+                // Insertar documento
+                $query = "INSERT INTO documents (user_id, name, mime_type, encrypted_content, encryption_iv) 
+                         VALUES (:user_id, :name, :mime_type, :encrypted_content, :encryption_iv)";
+                
+                $stmt = $conn->prepare($query);
+                $stmt->bindParam(':user_id', $userId);
+                $stmt->bindParam(':name', $name);
+                $stmt->bindParam(':mime_type', $mimeType);
+                $stmt->bindParam(':encrypted_content', $encryptedContent, PDO::PARAM_LOB);
+                $stmt->bindParam(':encryption_iv', $encryptionIv);
+                $stmt->execute();
+                
                 $documentId = $conn->lastInsertId();
+                
+                // Insertar clave del documento
+                $queryKey = "INSERT INTO document_keys (document_id, user_id, encrypted_key) 
+                            VALUES (:document_id, :user_id, :encrypted_key)";
+                            
+                $stmtKey = $conn->prepare($queryKey);
+                $stmtKey->bindParam(':document_id', $documentId);
+                $stmtKey->bindParam(':user_id', $userId);
+                $stmtKey->bindParam(':encrypted_key', $encryptedKey);
+                $stmtKey->execute();
                 
                 // Registrar evento de subida (opcional para MVP)
                 self::logDocumentAccess($conn, $documentId, $userId, 'upload');
+                
+                // Confirmar transacción
+                $conn->commit();
                 
                 ApiResponse::success(
                     ['id' => $documentId, 'name' => $name, 'mime_type' => $mimeType],
@@ -68,13 +88,12 @@ class DocumentController
                     201,
                     'document'
                 );
-            } else {
-                ApiResponse::error(
-                    'Error de servidor',
-                    'No se pudo guardar el documento',
-                    500
-                );
+            } catch (Exception $e) {
+                // Revertir transacción en caso de error
+                $conn->rollBack();
+                throw $e;
             }
+            
             
         } catch (Exception $e) {
             ApiResponse::error(
@@ -84,14 +103,12 @@ class DocumentController
             );
         }
     }
-    
-    /**
-     * Lista los documentos del usuario actual
-     * 
-     * @return void
-     */
+
     /**
      * Lista los documentos propios del usuario con paginación y filtros
+     * 
+     * @param array $input Parámetros de entrada para paginación y filtrado
+     * @return void
      */
     public static function listOwn($input)
     {
@@ -100,40 +117,65 @@ class DocumentController
             $userData = AuthMiddleware::authenticate();
             $userId = $userData->userId;
             
-            // Parámetros de paginación y filtrado
-            $page = max(1, $input['page'] ?? 1);
-            $perPage = min(50, $input['per_page'] ?? 10);
-            $order = in_array(strtolower($input['order'] ?? 'desc'), ['asc', 'desc']) ? strtoupper($input['order']) : 'DESC';
-            $search = $input['search'] ?? null;
+            // Validar y sanitizar la entrada
+            if (!is_array($input)) {
+                $input = [];
+            }
+            
+            // Parámetros de paginación y filtrado con validación
+            $page = isset($input['page']) && is_numeric($input['page']) ? max(1, (int)$input['page']) : 1;
+            $perPage = isset($input['per_page']) && is_numeric($input['per_page']) ? min(50, max(1, (int)$input['per_page'])) : 10;
+            $order = isset($input['order']) && in_array(strtolower($input['order']), ['asc', 'desc']) ? 
+                     strtoupper($input['order']) : 'DESC';
+            $search = isset($input['search']) && is_string($input['search']) ? trim($input['search']) : null;
             
             // Conectar a la base de datos
             $db = new Database();
             $conn = $db->connect();
             
-            // Construir consulta base
-            $baseQuery = "SELECT d.id, d.name, d.mime_type, d.created_at 
-                         FROM documents d 
-                         WHERE d.user_id = :user_id";
-            
-            $params = ['user_id' => $userId];
-            
-            // Aplicar filtros de búsqueda
-            if ($search) {
-                $baseQuery .= " AND d.name LIKE :search";
-                $params['search'] = "%$search%";
+            // Construir consulta base con mejor manejo de errores
+            try {
+                $baseQuery = "SELECT d.id, d.name, d.mime_type, d.created_at,
+                             dk.encrypted_key
+                             FROM documents d 
+                             INNER JOIN document_keys dk ON d.id = dk.document_id 
+                             WHERE dk.user_id = :user_id AND d.deleted_at IS NULL";
+                
+                error_log("Usuario ID: " . $userId);
+                $params = ['user_id' => $userId];
+                
+                // Aplicar filtros de búsqueda
+                if ($search) {
+                    $baseQuery .= " AND d.name LIKE :search";
+                    $params['search'] = "%$search%";
+                }
+                
+                // Ordenamiento
+                $baseQuery .= " ORDER BY d.created_at $order";
+                
+                error_log("Query base: " . $baseQuery);
+                error_log("Parámetros: " . print_r($params, true));
+                
+                // Consulta para el total de registros
+                $totalQuery = "SELECT COUNT(*) as total FROM ($baseQuery) as total_query";
+                $stmtTotal = $conn->prepare($totalQuery);
+                
+                foreach ($params as $key => $value) {
+                    error_log("Binding parámetro '$key' con valor: " . $value);
+                    $stmtTotal->bindValue(":$key", $value);
+                }
+                
+                $stmtTotal->execute();
+                $total = $stmtTotal->fetchColumn();
+                error_log("Total de registros encontrados: " . $total);
+                
+            } catch (PDOException $e) {
+                error_log("Error en consulta SQL: " . $e->getMessage());
+                error_log("SQL State: " . $e->errorInfo[0]);
+                error_log("Error Code: " . $e->errorInfo[1]);
+                error_log("Message: " . $e->errorInfo[2]);
+                throw new Exception("Error en la consulta de documentos: " . $e->getMessage());
             }
-            
-            // Ordenamiento
-            $baseQuery .= " ORDER BY d.created_at $order";
-            
-            // Consulta para el total de registros
-            $totalQuery = "SELECT COUNT(*) as total FROM ($baseQuery) as total_query";
-            $stmtTotal = $conn->prepare($totalQuery);
-            foreach ($params as $key => $value) {
-                $stmtTotal->bindValue(":$key", $value);
-            }
-            $stmtTotal->execute();
-            $total = $stmtTotal->fetchColumn();
             
             // Cálculos de paginación
             $lastPage = max(ceil($total / $perPage), 1);
@@ -176,11 +218,28 @@ class DocumentController
             ], 'Documentos recuperados correctamente', 200, 'documents');
             
         } catch (Exception $e) {
-            ApiResponse::error(
-                'Error al recuperar documentos',
-                $e->getMessage(),
-                401
-            );
+            // Si es un error específico de autenticación
+            if (strpos($e->getMessage(), 'Token') !== false || strpos($e->getMessage(), 'autenticación') !== false) {
+                ApiResponse::error(
+                    'Error de autenticación',
+                    $e->getMessage(),
+                    401
+                );
+            } else {
+                // Loguear el error para debugging
+                error_log("Error en listOwn: " . $e->getMessage());
+                error_log("Stack trace: " . $e->getTraceAsString());
+                
+                // Para otros tipos de errores
+                ApiResponse::error(
+                    'Error al recuperar documentos',
+                    'Detalles del error: ' . $e->getMessage() . 
+                    '. Código del error: ' . $e->getCode() . 
+                    '. En el archivo: ' . $e->getFile() . 
+                    ' línea: ' . $e->getLine(),
+                    500
+                );
+            }
         }
     }
 
@@ -205,11 +264,16 @@ class DocumentController
             $conn = $db->connect();
             
             // Construir consulta base
-            $baseQuery = "SELECT d.id, d.name, d.mime_type, d.created_at, u.email as shared_by, ds.created_at as shared_at
+            $baseQuery = "SELECT d.id, d.name, d.mime_type, d.created_at, 
+                         u.email as shared_by, ds.created_at as shared_at,
+                         dk.encrypted_key
                          FROM documents d 
                          JOIN document_shares ds ON d.id = ds.document_id 
-                         JOIN users u ON ds.shared_by_user_id = u.id
-                         WHERE ds.shared_with_user_id = :user_id";
+                         JOIN users u ON ds.shared_by = u.id
+                         LEFT JOIN document_keys dk ON d.id = dk.document_id AND dk.user_id = :user_id
+                         WHERE ds.shared_with = :user_id 
+                         AND d.deleted_at IS NULL 
+                         AND ds.deleted_at IS NULL";
             
             $params = ['user_id' => $userId];
             
@@ -308,10 +372,18 @@ class DocumentController
             $conn = $db->connect();
             
             // Verificar acceso al documento (propio o compartido)
-            $query = "SELECT d.*, ds.encrypted_key 
+            $query = "SELECT d.*, 
+                     COALESCE(ds.encrypted_key, dk.encrypted_key) as encrypted_key
                      FROM documents d 
-                     LEFT JOIN document_shares ds ON d.id = ds.document_id AND ds.shared_with_user_id = :user_id 
-                     WHERE d.id = :document_id AND (d.user_id = :user_id OR ds.id IS NOT NULL)
+                     LEFT JOIN document_shares ds ON d.id = ds.document_id AND ds.shared_with = :user_id
+                     LEFT JOIN document_keys dk ON d.id = dk.document_id AND dk.user_id = :user_id
+                     WHERE d.id = :document_id 
+                     AND (
+                         EXISTS (SELECT 1 FROM document_keys WHERE document_id = d.id AND user_id = :user_id)
+                         OR 
+                         EXISTS (SELECT 1 FROM document_shares WHERE document_id = d.id AND shared_with = :user_id)
+                     )
+                     AND d.deleted_at IS NULL
                      LIMIT 1";
             
             $stmt = $conn->prepare($query);
@@ -333,14 +405,19 @@ class DocumentController
             // Registrar acceso (opcional para MVP)
             self::logDocumentAccess($conn, $documentId, $userId, 'download');
             
-            // Convertir el contenido binario a base64 para transmitirlo
-            $document['encrypted_content'] = base64_encode($document['encrypted_content']);
-            
-            // Eliminar campos innecesarios
-            unset($document['user_id']);
+            // Preparar respuesta
+            $response = [
+                'id' => $document['id'],
+                'name' => $document['name'],
+                'mime_type' => $document['mime_type'],
+                'encrypted_content' => base64_encode($document['encrypted_content']),
+                'encryption_iv' => base64_encode($document['encryption_iv']),
+                'encrypted_key' => $document['encrypted_key'],
+                'created_at' => $document['created_at']
+            ];
             
             ApiResponse::success(
-                $document,
+                $response,
                 'Documento recuperado correctamente',
                 200,
                 'document'
@@ -435,10 +512,12 @@ class DocumentController
             
             // Verificar si ya está compartido con este usuario
             $queryCheck = "SELECT id FROM document_shares 
-                          WHERE document_id = :document_id AND shared_with_user_id = :shared_with_user_id LIMIT 1";
+                          WHERE document_id = :document_id 
+                          AND shared_with = :shared_with 
+                          AND deleted_at IS NULL LIMIT 1";
             $stmtCheck = $conn->prepare($queryCheck);
             $stmtCheck->bindParam(':document_id', $documentId);
-            $stmtCheck->bindParam(':shared_with_user_id', $sharedWithUserId);
+            $stmtCheck->bindParam(':shared_with', $sharedWithUserId);
             $stmtCheck->execute();
             
             if ($stmtCheck->fetch()) {
@@ -452,13 +531,13 @@ class DocumentController
             
             // Insertar el registro de compartir
             $queryInsert = "INSERT INTO document_shares 
-                           (document_id, shared_by_user_id, shared_with_user_id, encrypted_key) 
-                           VALUES (:document_id, :shared_by_user_id, :shared_with_user_id, :encrypted_key)";
+                           (document_id, shared_by, shared_with, encrypted_key) 
+                           VALUES (:document_id, :shared_by, :shared_with, :encrypted_key)";
             
             $stmtInsert = $conn->prepare($queryInsert);
             $stmtInsert->bindParam(':document_id', $documentId);
-            $stmtInsert->bindParam(':shared_by_user_id', $userId);
-            $stmtInsert->bindParam(':shared_with_user_id', $sharedWithUserId);
+            $stmtInsert->bindParam(':shared_by', $userId);
+            $stmtInsert->bindParam(':shared_with', $sharedWithUserId);
             $stmtInsert->bindParam(':encrypted_key', $encryptedKey);
             
             if ($stmtInsert->execute()) {

@@ -28,7 +28,11 @@ class AuthController
         $db = new Database();
         $conn = $db->connect();
 
-        $query = 'SELECT id, email, password, role, permissions, confirmed, disabled, token_version FROM users WHERE email = :email LIMIT 1';
+        $query = 'SELECT u.id, u.email, u.password, u.role, u.permissions, u.confirmed, u.disabled, u.token_version, 
+                        k.public_key 
+                 FROM users u 
+                 LEFT JOIN user_keys k ON u.id = k.user_id AND k.is_active = TRUE 
+                 WHERE u.email = :email LIMIT 1';
         $stmt = $conn->prepare($query);
         $stmt->bindParam(':email', $email);
 
@@ -118,12 +122,11 @@ class AuthController
 
                     ApiResponse::success(
                         [
-                            
                             'id' => $user['id'],
                             'token' => $jwt,
                             'email' => $user['email'],
-                            'permissions' => $encryptedPermissions
-                            
+                            'permissions' => $encryptedPermissions,
+                            'public_key' => $user['public_key']
                         ],
                         'Inicio de sesión exitoso.',
                         200,
@@ -193,23 +196,82 @@ class AuthController
         $randomCode = bin2hex(random_bytes(8)); // Código alfanumérico de 16 caracteres
         $encryptedCode = Encryption::encryptPayload("{$email}|{$randomCode}"); // Encriptar email y código juntos
 
-        // Registrar el usuario
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-        $confirmed = $confirmationRequired ? 0 : 1;
+        // Comenzar transacción
+        $conn->beginTransaction();
+        
+        try {
+            // Registrar el usuario
+            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+            $confirmed = $confirmationRequired ? 0 : 1;
 
-        $insertQuery = 'INSERT INTO users (email, password, role, confirmed, permissions, confirmation_code) 
-                        VALUES (:email, :password, :role, :confirmed, :permissions, :confirmation_code)';
-        $insertStmt = $conn->prepare($insertQuery);
-        $insertStmt->execute([
-            'email' => $email,
-            'password' => $hashedPassword,
-            'role' => $role,
-            'confirmed' => $confirmed,
-            'permissions' => $permissions ? json_encode($permissions) : null,
-            'confirmation_code' => $randomCode
-        ]);
+            $insertQuery = 'INSERT INTO users (email, password, role, confirmed, permissions, confirmation_code) 
+                            VALUES (:email, :password, :role, :confirmed, :permissions, :confirmation_code)';
+            $insertStmt = $conn->prepare($insertQuery);
+            $insertStmt->execute([
+                'email' => $email,
+                'password' => $hashedPassword,
+                'role' => $role,
+                'confirmed' => $confirmed,
+                'permissions' => $permissions ? json_encode($permissions) : null,
+                'confirmation_code' => $randomCode
+            ]);
 
-        $userId = $conn->lastInsertId();
+            $userId = $conn->lastInsertId();
+
+            // Si no requiere confirmación, generamos las claves inmediatamente
+            if (!$confirmationRequired) {
+                // Generar par de claves RSA
+                $config = [
+                    "digest_alg" => "sha256",
+                    "private_key_bits" => 2048,
+                    "private_key_type" => OPENSSL_KEYTYPE_RSA,
+                ];
+                
+                // Crear el par de claves
+                $res = openssl_pkey_new($config);
+                if (!$res) {
+                    throw new \Exception('Error al generar las claves de seguridad');
+                }
+
+                // Obtener la clave privada
+                openssl_pkey_export($res, $privateKey);
+
+                // Obtener la clave pública
+                $publicKeyDetails = openssl_pkey_get_details($res);
+                $publicKey = $publicKeyDetails["key"];
+                
+                // Limpiar la clave pública (remover headers PEM y saltos de línea)
+                $cleanPublicKey = preg_replace('/-----BEGIN PUBLIC KEY-----|-----END PUBLIC KEY-----|\s+/', '', $publicKey);
+
+                // Guardar la clave pública limpia
+                $insertKeyQuery = 'INSERT INTO user_keys (user_id, public_key, is_active) VALUES (:user_id, :public_key, TRUE)';
+                $insertKeyStmt = $conn->prepare($insertKeyQuery);
+                $insertKeyStmt->execute([
+                    'user_id' => $userId,
+                    'public_key' => $cleanPublicKey
+                ]);
+
+                // Enviar la clave privada por correo
+                $privateKeyEmailBody = "
+                    <h1>Tu Clave Privada</h1>
+                    <p>Esta es tu clave privada para cifrar documentos. Guárdala en un lugar seguro y no la compartas con nadie:</p>
+                    <pre>{$privateKey}</pre>
+                    <p><strong>IMPORTANTE:</strong> Esta clave es necesaria para descifrar tus documentos. 
+                    No podrás recuperar esta información más tarde, así que asegúrate de guardarla de forma segura.</p>
+                ";
+
+                $sendResult = EmailHelper::send($email, 'Tu Clave Privada - Importante', $privateKeyEmailBody);
+                if (!$sendResult) {
+                    throw new \Exception('Error al enviar la clave privada por correo');
+                }
+            }
+            
+            $conn->commit();
+        } catch (\Exception $e) {
+            $conn->rollBack();
+            ApiResponse::error('Error al registrar el usuario: ' . $e->getMessage(), null, 500);
+            return;
+        }
 
         // Enviar correo de confirmación si es necesario
         if ($confirmationRequired) {
@@ -307,10 +369,66 @@ class AuthController
         return;
         }
 
-        // Marcar como confirmada
-        $updateQuery = 'UPDATE users SET confirmed = 1, confirmation_code = NULL WHERE id = :id';
-        $updateStmt = $conn->prepare($updateQuery);
-        $updateStmt->execute(['id' => $user['id']]);
+        // Iniciar transacción
+        $conn->beginTransaction();
+        
+        try {
+            // Marcar como confirmada
+            $updateQuery = 'UPDATE users SET confirmed = 1, confirmation_code = NULL WHERE id = :id';
+            $updateStmt = $conn->prepare($updateQuery);
+            $updateStmt->execute(['id' => $user['id']]);
+
+            // Generar par de claves RSA
+            $config = [
+                "digest_alg" => "sha256",
+                "private_key_bits" => 2048,
+                "private_key_type" => OPENSSL_KEYTYPE_RSA,
+            ];
+            
+            // Crear el par de claves
+            $res = openssl_pkey_new($config);
+            if (!$res) {
+                throw new \Exception('Error al generar las claves de seguridad');
+            }
+
+            // Obtener la clave privada
+            openssl_pkey_export($res, $privateKey);
+
+            // Obtener la clave pública
+            $publicKeyDetails = openssl_pkey_get_details($res);
+            $publicKey = $publicKeyDetails["key"];
+            
+            // Limpiar la clave pública (remover headers PEM y saltos de línea)
+            $cleanPublicKey = preg_replace('/-----BEGIN PUBLIC KEY-----|-----END PUBLIC KEY-----|\s+/', '', $publicKey);
+
+            // Guardar la clave pública limpia
+            $insertKeyQuery = 'INSERT INTO user_keys (user_id, public_key, is_active) VALUES (:user_id, :public_key, TRUE)';
+            $insertKeyStmt = $conn->prepare($insertKeyQuery);
+            $insertKeyStmt->execute([
+                'user_id' => $user['id'],
+                'public_key' => $cleanPublicKey
+            ]);
+
+            // Enviar la clave privada por correo
+            $privateKeyEmailBody = "
+                <h1>Tu Clave Privada</h1>
+                <p>Esta es tu clave privada para cifrar documentos. Guárdala en un lugar seguro y no la compartas con nadie:</p>
+                <pre>{$privateKey}</pre>
+                <p><strong>IMPORTANTE:</strong> Esta clave es necesaria para descifrar tus documentos. 
+                No podrás recuperar esta información más tarde, así que asegúrate de guardarla de forma segura.</p>
+            ";
+
+            $sendResult = EmailHelper::send($email, 'Tu Clave Privada - Importante', $privateKeyEmailBody);
+            if (!$sendResult) {
+                throw new \Exception('Error al enviar la clave privada por correo');
+            }
+
+            $conn->commit();
+        } catch (\Exception $e) {
+            $conn->rollBack();
+            \helpers\ApiResponse::error('Error al confirmar la cuenta: ' . $e->getMessage(), null, 500);
+            return;
+        }
 
         // Respuesta exitosa
         \helpers\ApiResponse::success(
