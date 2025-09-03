@@ -1,17 +1,12 @@
 <?php
 use helpers\ApiResponse;
 use helpers\AuthMiddleware;
-use controllers\DocumentController;
+use controllers\UserController;
 
-
-
+// Autenticar usuario
 $currentUser = AuthMiddleware::authenticate(); // Obtener usuario autenticado desde el token
 if ($currentUser) {
-    // Obtener entrada
-    $input = json_decode(file_get_contents("php://input"), true);
-
-    // Llamar al controlador
-    DocumentController::share($input);
+   UserController::listActiveUsers($currentUser->email);
 } else {
     ApiResponse::error(
         'Acceso denegado',
@@ -19,3 +14,5 @@ if ($currentUser) {
         401
     );
 }
+
+
