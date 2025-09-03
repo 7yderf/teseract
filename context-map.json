@@ -1,0 +1,67 @@
+{
+  "nodes": [
+    {
+      "id": "teseract_front/src/modules/documents/components/DocsTable.vue",
+      "label": "DocsTable.vue",
+      "type": "component",
+      "language": "vue"
+    },
+    {
+      "id": "teseract_front/src/modules/documents/components/TableThead.vue",
+      "label": "TableThead.vue",
+      "type": "component",
+      "language": "vue"
+    },
+    {
+      "id": "teseract_front/src/modules/documents/components/DocsTable/ShareDocumentModal.vue",
+      "label": "ShareDocumentModal.vue",
+      "type": "component",
+      "language": "vue"
+    },
+    {
+      "id": "teseract_front/src/views/DocumentView.vue",
+      "label": "DocumentView.vue",
+      "type": "view",
+      "language": "vue"
+    },
+    {
+      "id": "teseract_front/src/modules/documents/composables/useDocument.ts",
+      "label": "useDocument.ts",
+      "type": "logic",
+      "language": "typescript"
+    },
+    {
+      "id": "teseract_front/src/modules/documents/store/StoreDocument.ts",
+      "label": "StoreDocument.ts",
+      "type": "state",
+      "language": "typescript"
+    }
+  ],
+  "edges": [
+    {
+      "from": "teseract_front/src/modules/documents/components/DocsTable.vue",
+      "to": "teseract_front/src/modules/documents/components/TableThead.vue",
+      "reason": "import"
+    },
+    {
+      "from": "teseract_front/src/modules/documents/components/DocsTable.vue",
+      "to": "teseract_front/src/modules/documents/components/DocsTable/ShareDocumentModal.vue",
+      "reason": "import"
+    },
+    {
+      "from": "teseract_front/src/modules/documents/components/DocsTable.vue",
+      "to": "teseract_front/src/views/DocumentView.vue",
+      "reason": "vista principal que hace uso de DocsTable y por medio del cual se transfiere el composeble useDocument"
+    },
+    {
+      "from": "teseract_front/src/views/DocumentView.vue",
+      "to": "teseract_front/src/modules/documents/composables/useDocument.ts",
+      "reason": "compaseble con la logica de los servicios enfocadas a la manipulacion de los dicumentos de forma individual, contiene la logica y los metodoas para subir un nuevo documento, compartir y descargar, est composable a su vez ase uso/imprtacion de storeDocument"
+    },
+    {
+      "from": "teseract_front/src/modules/documents/composables/useDocument.ts",
+      "to": "teseract_front/src/modules/documents/store/StoreDocument.ts",
+      "reason": "import"
+    }
+  ]
+}

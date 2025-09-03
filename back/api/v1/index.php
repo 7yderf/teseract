@@ -33,6 +33,7 @@ $router->register('POST', '/api/v1/documents/share', 'documents/share.php');
 
 // Registrar rutas para usuarios
 $router->register('GET', '/api/v1/users/public-key', 'users/get-public-key.php');
+$router->register('GET', '/api/v1/users/list', 'users/list.php');
 
 // Resolver la solicitud actual
 $method = $_SERVER['REQUEST_METHOD'];
