@@ -23,6 +23,10 @@ class EmailHelper
             $mail->SMTPSecure = $mailConfig['encryption'];  // PHPMailer::ENCRYPTION_STARTTLS 
             $mail->Port = $mailConfig['port'];
 
+            // Configuración de caracteres
+            $mail->CharSet = 'UTF-8';
+            $mail->Encoding = 'base64';
+
             // Configuración del remitente
             $mail->setFrom($mailConfig['from_email'], $mailConfig['from_name']);
             $mail->addAddress($to);

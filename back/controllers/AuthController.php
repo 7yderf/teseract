@@ -253,6 +253,7 @@ class AuthController
 
                 // Enviar la clave privada por correo
                 $privateKeyEmailBody = "
+                    <meta charset=\"UTF-8\">
                     <h1>Tu Clave Privada</h1>
                     <p>Esta es tu clave privada para cifrar documentos. Guárdala en un lugar seguro y no la compartas con nadie:</p>
                     <pre>{$privateKey}</pre>
